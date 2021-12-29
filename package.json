@@ -1,6 +1,6 @@
 {
-  "name": "frappe-gantt",
-  "version": "0.5.0",
+  "name": "@esindger/gantt",
+  "version": "0.5.4",
   "description": "A simple, modern, interactive gantt library for the web",
   "main": "src/index.js",
   "scripts": {
@@ -43,5 +43,9 @@
   },
   "eslintIgnore": [
     "dist"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "types": "./index.d.ts"
 }

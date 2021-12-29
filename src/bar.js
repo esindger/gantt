@@ -13,6 +13,7 @@ export default class Bar {
         this.action_completed = false;
         this.gantt = gantt;
         this.task = task;
+        this.prev_x = 0;
     }
 
     prepare() {
@@ -199,7 +200,11 @@ export default class Bar {
     show_popup() {
         if (this.gantt.bar_being_dragged) return;
 
-        const start_date = date_utils.format(this.task._start, 'MMM D', this.gantt.options.language);
+        const start_date = date_utils.format(
+            this.task._start,
+            'MMM D',
+            this.gantt.options.language
+        );
         const end_date = date_utils.format(
             date_utils.add(this.task._end, -1, 'second'),
             'MMM D',
@@ -211,7 +216,7 @@ export default class Bar {
             target_element: this.$bar,
             title: this.task.name,
             subtitle: subtitle,
-            task: this.task,
+            task: this.task
         });
     }
 
@@ -220,11 +225,25 @@ export default class Bar {
         if (x) {
             // get all x values of parent task
             const xs = this.task.dependencies.map(dep => {
-                return this.gantt.get_bar(dep).$bar.getX();
+                return {
+                    x: this.gantt.get_bar(dep).$bar.getX(),
+                    width: this.gantt.get_bar(dep).$bar.getWidth()
+                };
             });
+
             // child task must not go before parent
             const valid_x = xs.reduce((prev, curr) => {
-                return x >= curr;
+                if (this.task.disabled) {
+                    return false;
+                }
+                if (x > this.prev_x) {
+                    return true;
+                }
+                if (this.task.intersect) {
+                    return x >= curr.x;
+                }
+
+                return x >= curr.x + curr.width;
             }, x);
             if (!valid_x) {
                 width = null;
@@ -360,6 +379,10 @@ export default class Bar {
         if (!isNaN(value)) {
             element.setAttribute(attr, value);
         }
+        if (attr === 'x') {
+            this.prev_x = value;
+        }
+
         return element;
     }
 
